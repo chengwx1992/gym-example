@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gym
-from utils.packet_info import PacketInfo
-from utils.packet_record import PacketRecord
 import os
 import json
-
+import alphartc_gym
+from utils.packet_info import PacketInfo
+from utils.packet_record import PacketRecord
 
 GROUND_TRUTH = 300000
-ERROR = 0.2
+ERROR = 0.1
 
 def check_result(result, except_min, except_max, info):
     assert result >= except_min, \
@@ -18,7 +17,7 @@ def check_result(result, except_min, except_max, info):
         f"{info}={result}, larger than maximal except {except_max}"
 
 def gym_single_test(trace_path, load_ratio):
-    g = gym.Gym("test_gym")
+    g = alphartc_gym.Gym("test_gym")
     g.reset(trace_path=trace_path, report_interval_ms=60, duration_time_ms=0)
     packet_record = PacketRecord()
     packet_record.reset()
@@ -47,7 +46,6 @@ def gym_single_test(trace_path, load_ratio):
                  GROUND_TRUTH * min(1, load_ratio * (1 + ERROR)), 'receiving_rate')
 
 def test_gym_stability():
-    g = gym.Gym("test_gym")
     trace_path = os.path.join(
         os.path.dirname(__file__),
         "data",

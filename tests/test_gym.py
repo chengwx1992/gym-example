@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gym
-
+import alphartc_gym
 import os
 
 def test_basic():
     total_stats = []
-    g = gym.Gym("test_gym")
+    g = alphartc_gym.Gym("test_gym")
     g.reset()
     while True:
         stats, done = g.step(1000)
@@ -21,8 +20,8 @@ def test_basic():
 
 def test_multiple_instances():
     total_stats = []
-    g1 = gym.Gym()
-    g2 = gym.Gym()
+    g1 = alphartc_gym.Gym()
+    g2 = alphartc_gym.Gym()
     g1.reset()
     g2.reset()
     while True:
@@ -47,7 +46,7 @@ def test_trace():
         os.path.dirname(__file__),
         "data",
         "trace_example.json")
-    g = gym.Gym("test_gym")
+    g = alphartc_gym.Gym("test_gym")
     g.reset(trace_path=trace_path, report_interval_ms=60, duration_time_ms=0)
     while True:
         stats, done = g.step(1000)
