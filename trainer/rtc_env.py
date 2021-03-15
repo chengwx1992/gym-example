@@ -6,10 +6,9 @@ import __init__
 import os
 import random
 import numpy as np
+import glob
 import gym
 from gym import spaces
-import ray
-from ray.rllib.agents import ppo
 import alphartc_gym
 from utils.packet_info import PacketInfo
 from utils.packet_record import PacketRecord
@@ -36,7 +35,8 @@ class GymEnv:
     def __init__(self, step_time=60):
         self.gym_env = None     
         self.step_time = step_time
-        self.trace_set = os.path.join(os.path.dirname(__file__), "traces")
+        trace_dir = os.path.join(os.path.dirname(__file__), "traces")
+        self.trace_set = glob.glob(f'{trace_dir}/**/*.json', recursive=True)
         self.action_space = spaces.Box(low=0.0, high=1.0, shape=(1,), dtype=np.float64)
         self.observation_space = spaces.Box(
             low=np.array([0.0, 0.0, 0.0, 0.0]),
@@ -48,8 +48,8 @@ class GymEnv:
         self.gym_env.reset(trace_path=random.choice(self.trace_set),
             report_interval_ms=self.step_time,
             duration_time_ms=0)
-        packet_record = PacketRecord()
-        packet_record.reset()
+        self.packet_record = PacketRecord()
+        self.packet_record.reset()
         return [0.0, 0.0, 0.0, 0.0]
 
     def step(self, action):
@@ -69,17 +69,17 @@ class GymEnv:
             packet_info.header_length = pkt["header_length"]
             packet_info.payload_size = pkt["payload_size"]
             packet_info.bandwidth_prediction = bandwidth_prediction
-            packet_record.on_receive(packet_info)
+            self.packet_record.on_receive(packet_info)
 
         # calculate state
         states = []
-        receiving_rate = packet_record.calculate_receiving_rate(interval=self.step_time)
+        receiving_rate = self.packet_record.calculate_receiving_rate(interval=self.step_time)
         states.append(liner_to_log(receiving_rate))
-        delay = packet_record.calculate_average_delay(interval=self.step_time)
+        delay = self.packet_record.calculate_average_delay(interval=self.step_time)
         states.append(min(delay/1000, 1))
-        loss_ratio = packet_record.calculate_loss_ratio(interval=self.step_time)
+        loss_ratio = self.packet_record.calculate_loss_ratio(interval=self.step_time)
         states.append(loss_ratio)
-        latest_prediction = packet_record.calculate_latest_prediction()
+        latest_prediction = self.packet_record.calculate_latest_prediction()
         states.append(liner_to_log(latest_prediction))
 
         # calculate reward
@@ -87,8 +87,6 @@ class GymEnv:
 
         return states, reward, done, {}
 
-ray.init()
-trainer = ppo.PPOTrainer(env=GymEnv)
-
-while True:
-    print(trainer.train())
+my_gym = GymEnv()
+my_gym.reset()
+print(my_gym.step(0.5))
