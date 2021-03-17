@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import __init__
 
 import os
 import random
@@ -86,7 +85,3 @@ class GymEnv:
         reward = states[0] - states[1] - states[2]
 
         return states, reward, done, {}
-
-my_gym = GymEnv()
-my_gym.reset()
-print(my_gym.step(0.5))
