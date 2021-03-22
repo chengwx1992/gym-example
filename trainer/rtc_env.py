@@ -43,7 +43,7 @@ class GymEnv:
             dtype=np.float64)
 
     def reset(self):
-        self.gym_env = alphartc_gym.Gym("test_gym")
+        self.gym_env = alphartc_gym.Gym()
         self.gym_env.reset(trace_path=random.choice(self.trace_set),
             report_interval_ms=self.step_time,
             duration_time_ms=0)
